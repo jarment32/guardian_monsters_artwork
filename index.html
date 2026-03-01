@@ -1,98 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Guardian Monsters Arena</title>
+<link rel="stylesheet" href="assets/css/style.scss">
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
 <canvas id="gameCanvas"></canvas>
-<script>
-// ------------------ CONFIG ------------------
-const FID = 208189;
-let farcasterSDK, userFID, userPaid=false;
-let gameState="world"; // "world" o "arena"
-
-// ------------------ FARCASTER ------------------
-async function initFarcaster() {
-    farcasterSDK = new FarcasterSDK();
-    const account = await farcasterSDK.connectWallet();
-    userFID = account.fid;
-    userPaid = await checkFee(userFID);
-}
-
-async function checkFee(fid) {
-    try {
-        const res = await fetch(`/checkFee?fid=${fid}`);
-        const data = await res.json();
-        return data.paid;
-    } catch(e){ console.error(e); return false; }
-}
-
-async function payArenaFee(){
-    if(userPaid) return true;
-    const amountETH = await getEthAmountForUSD();
-    try{
-        const tx = await farcasterSDK.sendETH({ to:"0x039264FdED28cc7f7C21b29Cd6cDbBbeb8a5cc9e", value: amountETH });
-        await fetch(`/registerFeePaid`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({fid:userFID}) });
-        userPaid=true;
-        return true;
-    } catch(e){ alert("Payment failed."); console.error(e); return false; }
-}
-
-// ------------------ GAME WORLD ------------------
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-function resizeCanvas(){ canvas.width=window.innerWidth*devicePixelRatio; canvas.height=canvas.width*1.5; }
-window.addEventListener("resize", resizeCanvas); resizeCanvas();
-
-// Ejemplo simple de edificios
-const buildings=[
-    {name:"House", x:100, y:200, w:100, h:100},
-    {name:"Arena", x:300, y:200, w:120, h:120, fee:true}
-];
-
-canvas.addEventListener("click", async (e)=>{
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX-rect.left)*devicePixelRatio;
-    const my = (e.clientY-rect.top)*devicePixelRatio;
-
-    for(const b of buildings){
-        if(mx>=b.x && mx<=b.x+b.w && my>=b.y && my<=b.y+b.h){
-            if(b.fee){
-                // Arena
-                if(userPaid){
-                    gameState="arena";
-                } else {
-                    const ok = await payArenaFee();
-                    if(ok) gameState="arena";
-                }
-            } else {
-                alert(`You entered the ${b.name}!`);
-            }
-        }
-    }
-});
-
-// ------------------ GAME LOOP ------------------
-function drawWorld(){
-    ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="green";
-    buildings.forEach(b=>{
-        ctx.fillStyle=b.fee?"red":"green";
-        ctx.fillRect(b.x,b.y,b.w,b.h);
-        ctx.fillStyle="white";
-        ctx.fillText(b.name, b.x+5, b.y+20);
-    });
-    ctx.fillStyle="white"; ctx.fillText("Explore the world! Click buildings to interact.", 10,30);
-}
-
-function drawArena(){
-    ctx.fillStyle="#000";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="white";
-    ctx.fillText("Arena Battle - Fight your monsters!", 10,30);
-}
-
-function gameLoop(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(gameState==="world") drawWorld();
-    else if(gameState==="arena") drawArena();
-    requestAnimationFrame(gameLoop);
-}
-
-// ------------------ START ------------------
-initFarcaster().then(()=>{ requestAnimationFrame(gameLoop); });
-</script>
+<script type="module" src="index.js"></script>
+</body>
+</html>
