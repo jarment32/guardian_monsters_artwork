@@ -10,9 +10,9 @@
     "iconUrl": "https://guardian-monsters-artwork.vercel.app/icon.png",
     "homeUrl": "https://guardian-monsters-artwork.vercel.app",
     "imageUrl": "https://guardian-monsters-artwork.vercel.app/image.png",
-    "buttonTitle": "Enter Game",
+    "buttonTitle": "Play",
     "splashImageUrl": "https://guardian-monsters-artwork.vercel.app/splash.png",
-    "splashBackgroundColor": "#eeccff",
+    "splashBackgroundColor": "#222222",
     "webhookUrl": "https://guardian-monsters-artwork.vercel.app/api/webhook"
   }
 }
