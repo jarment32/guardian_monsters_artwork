@@ -1,11 +1,12 @@
 {
   "name": "Guardian Monsters Arena",
-  "description": "Battle in the Arena, explore the world of Guardian Monsters.",
+  "description": "Battle monsters and explore the world. Pay 0,10$ only one time, to enter the Arena and receive a future airdrop.",
   "version": "1.0.0",
-  "author": "Jose",
-  "icon": "/documents/img/logo.png",
-  "entrypoint": "/app.js",
-  "permissions": ["wallet:read", "wallet:write"],
-  "network": "mainnet",
-  "languages": ["en"]
+  "author_fid": 208189,
+  "main": "index.html",
+  "icon": "documents/img/logo.png",
+  "orientation": "portrait",
+  "aspect_ratio": "2:3",
+  "supported_features": ["wallet-integration", "airdrops"],
+  "permissions": ["eth_payment"]
 }
