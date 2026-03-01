@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIwODE4OSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDA3ZGU2RjU1NzMwNkI0MzkxOTc2Q2RhNWU1MGY1N2Q2QmY3RTdFRjIifQ",
+    "payload": "eyJkb21haW4iOiJndWFyZGlhbi1tb25zdGVycy1hcnR3b3JrLnZlcmNlbC5hcHAifQ",
+    "signature": "/BCMq9QG0RzadePrNwiWI3paZDKAdDlNdrCN+fZ7X78eTznEjDJ1UGoaZTzensg6SgVOnd9PQsHb0ZnKKoxPAhs="
+  },
+  "frame": {
+    "version": "1",
+    "name": "Guardian Monsters",
+    "iconUrl": "https://guardian-monsters-artwork.vercel.app/icon.png",
+    "homeUrl": "https://guardian-monsters-artwork.vercel.app",
+    "imageUrl": "https://guardian-monsters-artwork.vercel.app/image.png",
+    "buttonTitle": "Play Now",
+    "splashImageUrl": "https://guardian-monsters-artwork.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://guardian-monsters-artwork.vercel.app/api/webhook"
+  }
+}
