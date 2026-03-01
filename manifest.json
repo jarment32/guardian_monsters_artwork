@@ -1,12 +1,18 @@
 {
   "name": "Guardian Monsters Arena",
-  "description": "Battle monsters and explore the world. Pay 0,10$ only one time, to enter the Arena and receive a future airdrop.",
+  "short_name": "GMArena",
+  "description": "Interactive Guardian Monsters game integrated with Farcaster. Arena requires 0.10$ in ETH to enter, all other gameplay is free.",
   "version": "1.0.0",
-  "author_fid": 208189,
-  "main": "index.html",
-  "icon": "documents/img/logo.png",
-  "orientation": "portrait",
-  "aspect_ratio": "2:3",
-  "supported_features": ["wallet-integration", "airdrops"],
-  "permissions": ["eth_payment"]
+  "fid": 208189,
+  "icons": [
+    {
+      "src": "documents/img/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0f0f0f"
 }
