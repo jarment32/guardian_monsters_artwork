@@ -1,13 +1,11 @@
 {
-  "name": "Guardian Monsters",
-  "description": "Mini-app de combate de guardianes integrada en Farcaster",
+  "name": "Guardian Monsters Arena",
+  "description": "Battle in the Arena, explore the world of Guardian Monsters.",
   "version": "1.0.0",
   "author": "Jose",
-  "icon": "./documents/img/logo.png",
-  "start_url": "./index.html",
-  "orientation": "portrait",
-  "display": "standalone",
-  "platforms": ["web", "farcaster"],
-  "permissions": ["wallet", "network"],
-  "aspect_ratio": "2:3"
+  "icon": "/documents/img/logo.png",
+  "entrypoint": "/app.js",
+  "permissions": ["wallet:read", "wallet:write"],
+  "network": "mainnet",
+  "languages": ["en"]
 }
