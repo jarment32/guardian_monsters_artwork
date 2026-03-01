@@ -1,5 +1,4 @@
 import { startGame } from "./game.js";
-import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.min.js";
 
 const enterButton = document.getElementById('enterArena');
 const feeUSD = 0.10;
@@ -12,18 +11,18 @@ async function getETHPriceInUSD() {
 }
 
 enterButton.onclick = async () => {
-    if (!window.ethereum) return alert("Instala MetaMask u otro wallet compatible.");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+    if (!window.Farcaster) return alert("Abre la app en Farcaster con wallet integrada.");
+
+    const fc = new Farcaster.FarcasterSDK();
     const ethPrice = await getETHPriceInUSD();
-    const amount = (feeUSD / ethPrice).toFixed(6);
+    const amountETH = (feeUSD / ethPrice).toFixed(6);
 
     try {
-        const tx = await signer.sendTransaction({
+        const txHash = await fc.wallet.sendTransaction({
             to: feeETHAddress,
-            value: ethers.parseEther(amount.toString())
+            value: amountETH
         });
-        await tx.wait();
+        console.log("Pago enviado:", txHash);
         alert("Pago recibido, entrando en la arena...");
         startGame();
     } catch (e) {
