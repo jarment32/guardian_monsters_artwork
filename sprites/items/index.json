@@ -1,0 +1,7 @@
+[
+  { "name": "potion_small", "file": "potion_small.png" },
+  { "name": "potion_large", "file": "potion_large.png" },
+  { "name": "elixir", "file": "elixir.png" },
+  { "name": "sword_basic", "file": "sword_basic.png" },
+  { "name": "shield_wood", "file": "shield_wood.png" }
+]
