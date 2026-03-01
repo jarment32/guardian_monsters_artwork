@@ -1,0 +1,13 @@
+{
+  "name": "Guardian Monsters",
+  "description": "Mini-app de combate de guardianes integrada en Farcaster",
+  "version": "1.0.0",
+  "author": "Jose",
+  "icon": "./documents/img/logo.png",
+  "start_url": "./index.html",
+  "orientation": "portrait",
+  "display": "standalone",
+  "platforms": ["web", "farcaster"],
+  "permissions": ["wallet", "network"],
+  "aspect_ratio": "2:3"
+}
