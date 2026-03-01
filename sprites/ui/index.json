@@ -1,0 +1,10 @@
+[
+  { "name": "button_start", "file": "button_start.png" },
+  { "name": "button_attack", "file": "button_attack.png" },
+  { "name": "button_defend", "file": "button_defend.png" },
+  { "name": "button_items", "file": "button_items.png" },
+  { "name": "button_arena", "file": "button_arena.png" },
+  { "name": "health_bar", "file": "health_bar.png" },
+  { "name": "mana_bar", "file": "mana_bar.png" },
+  { "name": "status_icon", "file": "status_icon.png" }
+]
