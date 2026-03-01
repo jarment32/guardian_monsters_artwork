@@ -3,150 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="description" content="Guardian Monsters Arena - Farcaster Mini App">
 <title>Guardian Monsters Arena</title>
 <link rel="stylesheet" href="assets/css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/farcaster-sdk/dist/farcaster-sdk.min.js"></script>
 <style>
-    /* Ensure 2:3 aspect ratio and scaling for devicePixelRatio */
-    html, body { margin:0; padding:0; height:100%; overflow:hidden; }
-    #gameCanvas {
-        width:100vw;
-        height:calc(100vw * 1.5);
-        max-height:100vh;
-        display:block;
-        background:#000;
-    }
+html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#000; }
+#gameCanvas { width:100vw; height:calc(100vw*1.5); max-height:100vh; display:block; }
+button { position:absolute; padding:10px; font-size:16px; z-index:10; }
+#arenaButton { bottom:20px; left:20px; }
 </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
+<button id="arenaButton">Enter Arena</button>
 <script>
-/* ---- Farcaster & ETH Integration ---- */
-const FID = 208189; // Your fid for manifest reference
+/* ------------------ CONFIG ------------------ */
+const FID = 208189; // For manifest only
+const BACKEND_BASE = "https://your-backend.com"; // Replace with your backend API
+let farcasterSDK, userFID, userPaid=false;
 
-let farcasterSDK;
-let userFID;
-let userPaid = false;
-
-// Example backend endpoints
-const BACKEND_BASE = "https://your-backend.com"; // Replace with your backend or contract API
-
+/* ------------------ FARCASTER INIT ------------------ */
 async function initFarcaster() {
-    farcasterSDK = new FarcasterSDK(); // Initialize SDK
+    farcasterSDK = new FarcasterSDK();
     const account = await farcasterSDK.connectWallet();
     userFID = account.fid;
     console.log("User FID:", userFID);
     userPaid = await checkFee(userFID);
 }
-
 async function checkFee(fid) {
     try {
         const res = await fetch(`${BACKEND_BASE}/checkFee?fid=${fid}`);
         const data = await res.json();
-        return data.paid; // true if already paid
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+        return data.paid;
+    } catch(e){ console.error(e); return false; }
 }
-
-async function getEthAmountForUSD(usdAmount = 0.10) {
-    try {
+async function getEthAmountForUSD(usd=0.10){
+    try{
         const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
         const data = await res.json();
-        const ethPrice = data.ethereum.usd;
-        return (usdAmount / ethPrice).toFixed(6); // approx ETH
-    } catch (e) {
-        console.error(e);
-        return 0;
-    }
+        return (usd / data.ethereum.usd).toFixed(6);
+    }catch(e){console.error(e); return 0;}
 }
-
-async function payArenaFee() {
+async function payArenaFee(){
     if(userPaid) return true;
-    const amountETH = await getEthAmountForUSD(0.10);
-    try {
-        const tx = await farcasterSDK.sendETH({
-            to: "0x039264FdED28cc7f7C21b29Cd6cDbBbeb8a5cc9e",
-            value: amountETH
-        });
+    const amountETH = await getEthAmountForUSD();
+    try{
+        const tx = await farcasterSDK.sendETH({ to:"0x039264FdED28cc7f7C21b29Cd6cDbBbeb8a5cc9e", value: amountETH });
         console.log("Transaction hash:", tx.hash);
-        await registerFeePaid(userFID);
-        userPaid = true;
+        await fetch(`${BACKEND_BASE}/registerFeePaid`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({fid:userFID}) });
+        userPaid=true;
         return true;
-    } catch(e) {
-        console.error("Payment failed:", e);
-        alert("Payment failed, cannot enter Arena.");
-        return false;
-    }
+    }catch(e){ alert("Payment failed."); console.error(e); return false; }
 }
 
-async function registerFeePaid(fid) {
-    try {
-        await fetch(`${BACKEND_BASE}/registerFeePaid`, {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({fid})
-        });
-    } catch(e) {
-        console.error(e);
-    }
-}
-
-/* ---- Game Initialization ---- */
+/* ------------------ CANVAS ------------------ */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+function resizeCanvas(){ canvas.width=window.innerWidth*devicePixelRatio; canvas.height=canvas.width*1.5; }
+window.addEventListener("resize", resizeCanvas); resizeCanvas();
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth * devicePixelRatio;
-    canvas.height = canvas.width * 1.5;
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-// Load assets (sprites, tiles, backdrops)
+/* ------------------ ASSETS ------------------ */
 const assets = {};
-const imageList = [
+const imageList=[
     "tilesets/limbusdev_world2.png",
     "backdrops/battle/cave.png",
     "sprites/monsters/128x128/0_0.png",
-    "sprites/ui/b-fight.png"
-    // Add all other sprites/backdrops needed
+    "sprites/ui/b-fight.png",
+    "sprites/ui/healthbar.png"
 ];
+imageList.forEach(src=>{ const img=new Image(); img.src=src; assets[src]=img; });
 
-imageList.forEach(src => {
-    const img = new Image();
-    img.src = src;
-    assets[src] = img;
-});
+/* ------------------ GAME STATE ------------------ */
+let gameState="world";
+let monsters=[{x:100,y:50,hp:100,maxHp:100}];
 
-/* ---- Simple Game Loop ---- */
-let gameState = "world"; // "world", "arena"
-function gameLoop() {
+/* ------------------ UI ------------------ */
+const arenaBtn=document.getElementById("arenaButton");
+arenaBtn.onclick=async()=>{
+    const ok = await payArenaFee();
+    if(ok) gameState="arena";
+};
+
+/* ------------------ GAME LOOP ------------------ */
+function drawWorld(){
+    ctx.drawImage(assets["tilesets/limbusdev_world2.png"],0,0,canvas.width,canvas.height);
+    ctx.fillStyle="white"; ctx.font="20px Arial"; ctx.fillText("World - Click 'Enter Arena' to fight!", 10,30);
+}
+function drawArena(){
+    ctx.drawImage(assets["backdrops/battle/cave.png"],0,0,canvas.width,canvas.height);
+    monsters.forEach(m=>{
+        ctx.drawImage(assets["sprites/monsters/128x128/0_0.png"],m.x,m.y,128,128);
+        // HP bar
+        ctx.drawImage(assets["sprites/ui/healthbar.png"], m.x, m.y-10, 128*(m.hp/m.maxHp),10);
+    });
+    ctx.drawImage(assets["sprites/ui/b-fight.png"],10,canvas.height-100,100,50);
+    ctx.fillStyle="white"; ctx.font="18px Arial"; ctx.fillText("Arena Battle - Fight the monsters!", 10,30);
+}
+function gameLoop(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(gameState === "world") {
-        // Draw world tiles
-        ctx.drawImage(assets["tilesets/limbusdev_world2.png"],0,0,canvas.width,canvas.height);
-        // Example click to enter arena
-        canvas.onclick = async () => {
-            const feePaid = await payArenaFee();
-            if(feePaid) gameState = "arena";
-        };
-    } else if(gameState === "arena") {
-        ctx.drawImage(assets["backdrops/battle/cave.png"],0,0,canvas.width,canvas.height);
-        // Draw monster and UI
-        ctx.drawImage(assets["sprites/monsters/128x128/0_0.png"],50,50,128,128);
-        ctx.drawImage(assets["sprites/ui/b-fight.png"], 10, canvas.height - 100, 100, 50);
-    }
+    if(gameState==="world") drawWorld();
+    else if(gameState==="arena") drawArena();
     requestAnimationFrame(gameLoop);
 }
 
-/* ---- Start Game ---- */
-initFarcaster().then(() => {
-    requestAnimationFrame(gameLoop);
-});
+/* ------------------ START ------------------ */
+initFarcaster().then(()=>{ requestAnimationFrame(gameLoop); });
 </script>
 </body>
 </html>
